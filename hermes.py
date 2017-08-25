@@ -19,7 +19,6 @@ def getUpdates(offset=None):
     if offset:
         request += '?offset={}'.format(int(offset)+1)
     updates = getUrl(request)
-    # updates = updates.text.decode("utf-8")
     updates = json.loads(updates.text)
     # try:
     #     print(updates)
