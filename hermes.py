@@ -18,34 +18,30 @@ def getPublicIP():
 ## HELPER FUNCTIONS ##
 ######################
 
-
 def getUpdates(offset=None):
+    #apparently requests has json decoding builtin via .json()
+    #TODO
     request = URL + 'getUpdates'
     if offset:
         request += '?offset={}'.format(int(offset)+1)
     updates = getUrl(request)
     updates = json.loads(updates.text)
-    # try:
-    #     print(updates)
-    # except UnicodeEncodeError:
-    #     print("Unicode, can't parse.")
-
-    messages = []
-
     if updates['result']:
-        updates = updates['result']
-        last_update = updates[-1]['update_id']
-        # print("Last Update ID: {}".format(last_update))
-        for result in updates:
-            try:
-                messages.append(result['message']['text'])
-            except:
-                print("Unicode, can't parse.")
-        saveLastUpdate(last_update)
+        return updates['result']
+
+
+def parseMessages(updates):
+    messages = []
+    new_update = updates[-1]['update_id']
+    # print("Last Update ID: {}".format(new_update))
+    for result in updates:
+        try:
+            messages.append(result['message']['text'])
+        except:
+            print("Unicode, can't parse.")
+    saveNewUpdate(new_update)
     return messages
 
-
-def parseMessages(messages):
     for message in messages:
         print("Received message: \"{}\"".format(message))
 
@@ -61,7 +57,7 @@ def getUrl(url):
     return requests.get(url)
 
 
-def saveLastUpdate(id):
+def saveNewUpdate(id):
     with open('update_id.txt', 'w') as logFile:
         logFile.writelines(str(id))    
     print('Done updating, current Update ID is {}.'.format(id))
@@ -76,5 +72,5 @@ if __name__ == '__main__':
     with open('update_id.txt', 'r') as logFile:
         last_update = logFile.readline()
     print('Fetching new messages, last Update ID was {}.'.format(last_update))
-    new_updates = getUpdates(last_update)
-    parseMessages(new_updates)
+    updates = getUpdates(last_update)
+    parseMessages(updates)
